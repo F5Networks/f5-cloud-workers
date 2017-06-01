@@ -1,0 +1,63 @@
+{
+    "name": "f5-iappslx-service-discovery",
+    "inputProperties": [
+        {
+            "id": "f5-iappslx-service-discovery",
+            "type": "JSON",
+            "value": {
+                "app": {
+                    "memberTag": {
+                        "key": "Name",
+                        "value": ""
+                    },
+                    "memberAddressType": "private",
+                    "poolName": "",
+                    "poolPort": 80,
+                    "connectionLimit": 1000,
+                    "connectionRateLimit": 0
+                },
+                "pools": {
+                    "defaultPool": {
+                        "name": "",
+                        "defaultPort": null,
+                        "ssl": false,
+                        "loadBalancingMode": "least-connections-member",
+                        "slowRampTime": 300,
+                        "monitors": {
+                            "names": [],
+                            "references": [
+                                "httpMonitor",
+                                "httpsMonitor"
+                            ]
+                        }
+                    }
+                },
+                "monitors": {
+                    "httpMonitor": {
+                        "monitor": "/Common/http",
+                        "interval": 15,
+                        "httpMethod": "GET",
+                        "sendUri": "/",
+                        "recvString": "200 OK"
+                    },
+                    "httpsMonitor": {
+                        "monitor": "/Common/https",
+                        "interval": 15,
+                        "httpMethod": "GET",
+                        "sendUri": "/",
+                        "recvString": "200 OK"
+                    }
+                }
+            },
+            "metaData": {}
+        }
+    ],
+    "configurationProcessorReference": {
+        "link": "https://localhost/mgmt/shared/iapp/processors/f5-iappslx-service-discovery"
+    },
+    "presentationHtmlReference": {
+        "link": "https://localhost/iapps/f5-iappslx-service-discovery/index.html"
+    },
+    "configProcessorTimeoutSeconds": 30,
+    "state": "TEMPLATE"
+}
