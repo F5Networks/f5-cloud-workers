@@ -1,0 +1,20 @@
+{
+  "name": "f5-cloud-nodes-worker",
+  "version": "1.0.0",
+  "description": "F5 Rest worker for finding nodes in cloud environments",
+  "repository": {
+    "type": "git",
+    "url": "https://gitswarm.f5net.com/cloudsolutions/f5-cloud-workers.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "jshint": "latest",
+    "nodeunit": "^0.11"
+  },
+  "scripts": {
+    "test": "node_modules/nodeunit/bin/nodeunit --reporter eclipse test/nodejs",
+    "build": "rpmbuild -bb --define \"main $(pwd)\" --define '_topdir %{main}/build' f5-cloud-nodes-worker.spec"
+  }
+}
