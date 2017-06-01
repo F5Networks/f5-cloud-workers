@@ -26,6 +26,14 @@ function CloudNodesWorker() {}
 CloudNodesWorker.prototype.WORKER_URI_PATH = "shared/cloud/nodes";
 CloudNodesWorker.prototype.isPublic = true;
 
+CloudNodesWorker.prototype.onStart = function(callback) {
+    this.logger.silly = this.logger.finest;
+    this.logger.debug = this.logger.fine;
+    this.logger.error = this.logger.severe;
+    this.logger.warn = this.logger.warning;
+    callback();
+};
+
 /**
  * Handles GET HTTP requests
  *
@@ -45,8 +53,8 @@ CloudNodesWorker.prototype.isPublic = true;
 CloudNodesWorker.prototype.onGet = function(restOperation) {
     var query = restOperation.getUri().query;
     var Provider;
-    var provider;
     var providerPath;
+    var providerDir;
 
     this.logger.fine(logId, "onGet");
 
@@ -69,21 +77,21 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
 
     this.logger.fine(logId, "using cloud", query.cloud);
 
-    this.logger.silly = this.logger.finest;
-    this.logger.debug = this.logger.fine;
-    this.logger.error = this.logger.severe;
-    this.logger.warn = this.logger.warning;
-    providerPath = '/config/cloud/' + query.cloud + '/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-' + query.cloud;
-    Provider = require(providerPath).provider;
-    provider = new Provider(
-        {
-            clOptions: {user: 'admin'},
-            logger: this.logger
-        }
-    );
+    // this.provider can be set by test code, otherwise, get it from the known location
+    if (!this.provider) {
+        providerDir = query.cloud === 'azure' ? '/' : '/' + query.cloud + '/';
+        providerPath = '/config/cloud' + providerDir + 'node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-' + query.cloud;
+        Provider = require(providerPath).provider;
+        this.provider = new Provider(
+            {
+                clOptions: {user: 'admin'},
+                logger: this.logger
+            }
+        );
+    }
 
     this.logger.debug('Initializing cloud provider');
-    provider.init(
+    return this.provider.init(
         {
             mgmtPort: query.mgmtPort || 443,
             region: query.region.trim(),
@@ -112,13 +120,13 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
         this.logger.finest(logId, "key", key);
         this.logger.finest(logId, "value", value);
 
-        promises.push(provider.getNicsByTag(
+        promises.push(this.provider.getNicsByTag(
             {
                 key: key,
                 value: value
             }
         ));
-        promises.push(provider.getVmsByTag(
+        promises.push(this.provider.getVmsByTag(
             {
                 key: key,
                 value: value
@@ -128,24 +136,22 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
         return Promise.all(promises);
     }.bind(this))
     .then(function(responses) {
-        var nics = responses[0];
-        var vms = responses[1];
+        var nics = responses[0] || [];
+        var vms = responses[1] || [];
         var nodes;
 
         this.logger.finest('nics', JSON.stringify(nics));
         this.logger.finest('vms', JSON.stringify(vms));
 
-        if (nics.length > 0) {
-            nodes = nics.reduce(function(result, nic) {
-                var node = getNode(nic, query);
-                if (node) {
-                    result.push(node);
-                }
-                return result;
-            }, []);
-        }
+        nodes = nics.reduce(function(result, nic) {
+            var node = getNode(nic, query);
+            if (node) {
+                result.push(node);
+            }
+            return result;
+        }, []);
 
-        if (!nodes) {
+        if (nodes.length === 0) {
             this.logger.debug('no valid nics found, trying vms');
             nodes = vms.reduce(function(result, vm) {
                 var node = getNode(vm, query);
