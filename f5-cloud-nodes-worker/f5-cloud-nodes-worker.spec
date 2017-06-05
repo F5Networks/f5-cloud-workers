@@ -14,10 +14,11 @@ REST worker for discovering nodes in a cloud environment
 %define IAPP_DIR /var/config/rest/iapps/%{name}
 
 %prep
-rm -rf %{BUILD_DIR}
-mkdir -p %{BUILD_DIR}/node_modules
+mkdir -p %{BUILD_DIR}
 cp -r -L %{main}/src/* %{BUILD_DIR}
-cp -r -L %{main}/node_modules %{BUILD_DIR}
+if [[ -d %{main}/node_modules ]]; then
+    cp -r -L %{main}/node_modules %{BUILD_DIR}
+fi
 
 # update IAPP_NAME and VERSION in f5-iappslx-lib
 for fn in $(find %{BUILD_DIR}/nodejs -name \*.json -o -name \*.js)
