@@ -1,0 +1,38 @@
+image: node:4
+
+stages:
+    - test
+    - package
+
+test:
+    tags:
+        - docker-executor
+    stage: test
+    script:
+        - for d in */; do
+        -     if [[ "$d" != "dist/" ]]; then
+        -         pushd "$d"
+        -         npm install
+        -         npm test
+        -         popd
+        -     fi
+        - done
+
+package:
+    tags:
+        - docker-executor
+    stage: package
+    only:
+        - /^release-.*/
+        - /^hf-.*/
+        - /^hotfix-.*/
+        - triggers
+    script:
+        - apt-get -q update
+        - apt-get -y install rpm
+        - ./build.sh
+
+    artifacts:
+        name: f5-cloud-workers-$CI_BUILD_REF
+        paths:
+            - dist/
