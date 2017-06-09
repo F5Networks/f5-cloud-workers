@@ -55,6 +55,8 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
     var Provider;
     var providerPath;
     var providerDir;
+    var providerOptions;
+    var pairs;
 
     this.logger.fine(logId, "onGet");
 
@@ -70,10 +72,6 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
         restOperation.fail(new Error('memberAddressType is a required parameter'));
         return;
     }
-
-    query.roleArn = query.roleArn || '';
-    query.externalId = query.externalId || '';
-    query.region = query.region || '';
 
     this.logger.fine(logId, "using cloud", query.cloud);
 
@@ -91,16 +89,24 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
     }
 
     this.logger.debug('Initializing cloud provider');
-    return this.provider.init(
-        {
-            mgmtPort: query.mgmtPort || 443,
-            region: query.region.trim(),
-            tempCredentials: {
-                roleArn: query.roleArn.trim(),
-                externalId: query.externalId.trim(),
+    providerOptions = {
+        mgmtPort: query.mgmtPort || 443
+    };
+
+    if (query.providerOptions) {
+        pairs = query.providerOptions.split(',');
+        pairs.forEach(function(pair) {
+            var keyValue = pair.split('=');
+            if (keyValue.length === 2) {
+                providerOptions[keyValue[0].trim()] = keyValue[1].trim();
             }
-        }
-    )
+            else {
+                restOperation.fail(new Error('invalid providerOptions:' + providerOptions));
+            }
+        });
+    }
+
+    return this.provider.init(providerOptions)
     .then(function() {
         this.logger.debug('Getting NICs');
 

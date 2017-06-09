@@ -22,6 +22,7 @@ var providerMock;
 var restOperationMock;
 var nodesWorker;
 var query;
+var providerOptionsSent;
 var bodySent;
 var errorSent;
 var expectedPath;
@@ -43,7 +44,8 @@ loggerMock = {
 };
 
 providerMock = {
-    init: function() {
+    init: function(providerOptions) {
+        providerOptionsSent = providerOptions;
         return Promise.resolve();
     },
     getNicsByTag: function() {},
@@ -129,6 +131,27 @@ module.exports = {
             delete require.cache[key];
         });
         callback();
+    },
+
+    testProviderOptions: function(test) {
+        query = {
+            cloud: 'aws',
+            memberTag: 'foo=bar',
+            memberAddressType: 'private',
+            providerOptions: 'hello=world,okie=dokie'
+        };
+
+        test.expect(2);
+        nodesWorker.onGet(restOperationMock)
+            .then(function() {
+                test.strictEqual(providerOptionsSent.hello, "world");
+                test.strictEqual(providerOptionsSent.okie, "dokie");
+                test.done();
+            })
+            .catch(function(err) {
+                test.ok(false, err);
+                test.done();
+            });
     },
 
     testPrivateNics: function(test) {
