@@ -168,14 +168,13 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
             }, []);
         }
 
-        if (!nodes) {
+        if (nodes.length === 0) {
             this.logger.debug('no valid pool nodes found');
         }
-        else {
-            restOperation.setContentType('application/json');
-            restOperation.setBody(nodes);
-            this.completeRestOperation(restOperation);
-        }
+
+        restOperation.setContentType('application/json');
+        restOperation.setBody(nodes);
+        this.completeRestOperation(restOperation);
     }.bind(this))
     .catch(function(err) {
         this.logger.severe('Error while getting nodes', err);
