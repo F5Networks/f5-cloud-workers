@@ -96,8 +96,8 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
     if (query.providerOptions) {
         pairs = query.providerOptions.split(',');
         pairs.forEach(function(pair) {
-            var keyValue = pair.split('=');
-            if (keyValue.length === 2) {
+            var keyValue = pair.split(/=(.+)/);
+            if (keyValue.length > 1) {
                 providerOptions[keyValue[0].trim()] = keyValue[1].trim();
             }
             else {
