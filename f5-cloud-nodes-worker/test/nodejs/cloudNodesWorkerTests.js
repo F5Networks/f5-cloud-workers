@@ -138,14 +138,15 @@ module.exports = {
             cloud: 'aws',
             memberTag: 'foo=bar',
             memberAddressType: 'private',
-            providerOptions: 'hello=world,okie=dokie'
+            providerOptions: 'hello=world,okie=dokie,withEquals=one=two'
         };
 
-        test.expect(2);
+        test.expect(3);
         nodesWorker.onGet(restOperationMock)
             .then(function() {
                 test.strictEqual(providerOptionsSent.hello, "world");
                 test.strictEqual(providerOptionsSent.okie, "dokie");
+                test.strictEqual(providerOptionsSent.withEquals, "one=two");
                 test.done();
             })
             .catch(function(err) {
