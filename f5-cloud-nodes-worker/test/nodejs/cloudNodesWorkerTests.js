@@ -264,5 +264,65 @@ module.exports = {
                 test.ok(false, err);
                 test.done();
             });
+    },
+
+    testNoVms: function(test) {
+        providerMock.getVmsByTag = function() {
+            return Promise.resolve([]);
+        };
+
+        query = {
+            cloud: 'aws',
+            memberTag: 'foo=bar',
+            memberAddressType: 'private'
+        };
+
+        test.expect(1);
+        nodesWorker.onGet(restOperationMock)
+            .then(function() {
+                if (errorSent) {
+                        test.ok(false, errorSent);
+                }
+                else {
+                    test.deepEqual(
+                        bodySent,
+                        [
+                            {
+                                id: '1-private',
+                                ip: '5.6.7.8'
+                            },
+                            {
+                                id: '2-private',
+                                ip: '15.16.17.18'
+                            }
+                        ]
+                    );
+                }
+                test.done();
+            })
+            .catch(function(err) {
+                test.ok(false, err);
+                test.done();
+            });
+    },
+
+    testNoNicsNoVms: function(test) {
+        providerMock.getNicsByTag = function() {
+            return Promise.resolve();
+        };
+
+        providerMock.getVmsByTag = function() {
+            return Promise.resolve();
+        };
+
+        nodesWorker.onGet(restOperationMock)
+            .then(function() {
+                test.deepEqual(bodySent, []);
+                test.done();
+            })
+            .catch(function(err) {
+                test.ok(false, err);
+                test.done();
+            });
     }
 };
