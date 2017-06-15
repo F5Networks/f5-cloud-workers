@@ -100,9 +100,6 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
             if (keyValue.length > 1) {
                 providerOptions[keyValue[0].trim()] = keyValue[1].trim();
             }
-            else {
-                restOperation.fail(new Error('invalid providerOptions:' + providerOptions));
-            }
         });
     }
 
