@@ -54,7 +54,6 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
     var query = restOperation.getUri().query;
     var Provider;
     var providerPath;
-    var providerDir;
     var providerOptions;
     var pairs;
 
@@ -77,8 +76,7 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
 
     // this.provider can be set by test code, otherwise, get it from the known location
     if (!this.provider) {
-        providerDir = query.cloud === 'azure' ? '/' : '/' + query.cloud + '/';
-        providerPath = '/config/cloud' + providerDir + 'node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-' + query.cloud;
+        providerPath = '/config/cloud/' + query.cloud + '/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-' + query.cloud;
         Provider = require(providerPath).provider;
         this.provider = new Provider(
             {
