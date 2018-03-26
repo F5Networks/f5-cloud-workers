@@ -76,7 +76,7 @@ CloudNodesWorker.prototype.onGet = function(restOperation) {
 
     // this.provider can be set by test code, otherwise, get it from the known location
     if (!this.provider) {
-        providerPath = '/config/cloud/' + query.cloud + '/node_modules/f5-cloud-libs/node_modules/f5-cloud-libs-' + query.cloud;
+        providerPath = '/config/cloud/' + query.cloud + '/node_modules/@f5devcentral/f5-cloud-libs-' + query.cloud;
         Provider = require(providerPath).provider;
         this.provider = new Provider(
             {
