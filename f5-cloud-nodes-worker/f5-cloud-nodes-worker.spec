@@ -1,6 +1,6 @@
 Summary: F5 cloud nodes worker
 Name: f5-cloud-nodes-worker
-Version: 1.1.0
+Version: 2.0.0
 Release: 1
 BuildArch: noarch
 Group: Development/Libraries
